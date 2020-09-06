@@ -73,8 +73,8 @@
                 {%if
                     classes.class[loop.index0].subject == filters.subject and
                     classes.schedule[loop.index0].weekday == filters.weekday - 1 and
-                    time_fun([filters.time]) >= classes.schedule[loop.index0].time_from and
-                    time_fun([filters.time]) <= classes.schedule[loop.index0].time_to or
+                    time_fun([filters.time]) > classes.schedule[loop.index0].time_from and
+                    time_fun([filters.time]) < classes.schedule[loop.index0].time_to or
                     is_not_searching
                 %}
                 <article class="teacher-item">

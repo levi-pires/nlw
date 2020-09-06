@@ -76,12 +76,6 @@ const serv = server
           .then(console.log);
       });
 
-      /* proffys.push({
-        ...query,
-        time_from: time.parseTime(query.time_from),
-        time_to: time.parseTime(query.time_to),
-      }); */
-
       return res.redirect("/study");
     }
 
