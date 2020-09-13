@@ -56,19 +56,47 @@ async function create(
 }
 
 async function getAll(db: import("../../sqlite-async/sqlite-async")) {
-  return {
-    proffys: (await db.all(`
-      SELECT * FROM 'proffys';
-    `)) as types.ProffyQuery[],
-    classes: {
-      class: (await db.all(`
-        SELECT * FROM 'classes';
-      `)) as types.ClassQuery[],
-      schedule: (await db.all(`
-        SELECT * FROM 'class_schedule';
-      `)) as types.ScheduleQuery[],
-    },
-  };
+  const proffys = (await db.all(
+    "SELECT * FROM 'proffys'"
+  )) as types.ProffyQuery[];
+
+  return await Promise.all(
+    proffys.map(async (item) => {
+      const claz = (await db.get(
+        `SELECT * FROM 'classes' WHERE proffy_id = ${item.id}`
+      )) as types.ClassQuery;
+
+      return {
+        proffy: item,
+        class: {
+          this: claz,
+          schedule: (await db.all(
+            `SELECT * FROM 'class_schedule' WHERE class_id = ${claz.id}`
+          )) as types.ScheduleQuery[],
+        },
+      };
+    })
+  );
 }
 
-export default { create, getAll };
+function has(
+  item: {
+    proffy: types.ProffyQuery;
+    class: {
+      this: types.ClassQuery;
+      schedule: types.ScheduleQuery[];
+    };
+  },
+  { time, weekday, subject }: { time: number; weekday: string; subject: string }
+) {
+  return (
+    item.class.schedule.some(
+      (item) =>
+        item.weekday == weekday &&
+        item.time_from <= time &&
+        item.time_to >= time
+    ) && item.class.this.subject == subject
+  );
+}
+
+export default { create, getAll, has };

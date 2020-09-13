@@ -68,40 +68,30 @@
         </header>
 
         <main>
-            {% set count = 0 %}
-            {%for proffy in proffys %}
-                {%if
-                    classes.class[loop.index0].subject == filters.subject and
-                    classes.schedule[loop.index0].weekday == filters.weekday - 1 and
-                    time_fun([filters.time]) > classes.schedule[loop.index0].time_from and
-                    time_fun([filters.time]) < classes.schedule[loop.index0].time_to or
-                    is_not_searching
-                %}
+            {%for proffy in proffyList %}
                 <article class="teacher-item">
                     <header>
-                        <img src="{{proffy.avatar}}" alt="{{proffy.avatar}}">
+                        <img src="{{proffy.proffyData.avatar}}" alt="{{proffy.proffyData.avatar}}">
                         <div>
-                            <strong>{{proffy.name}}</strong>
-                            <span>{{subjects[classes.class[loop.index0].subject - 1]}}</span>
+                            <strong>{{proffy.proffyData.name}}</strong>
+                            <span>{{subjects[proffy.subject - 1]}}</span>
                         </div>
                     </header>
-                    <p>{{proffy.bio}}</p>
+                    <p>{{proffy.proffyData.bio}}</p>
                     <footer>
-                        <p>Preço/hora <strong>R$ {{classes.class[loop.index0].cost}}</strong></p>
-                        <a href="https://api.whatsapp.com/send?l=pt_BR&phone=55{{proffy.whats}}
-                    &text=Tenho interesse na sua aula de {{subjects[proffy.subject - 1]}}, {{proffy.name}}" class="button" target="_blank">
+                        <p>Preço/hora <strong>R$ {{proffy.cost}}</strong></p>
+                        <a href="https://api.whatsapp.com/send?l=pt_BR&phone=55{{proffy.proffyData.whats}}
+                    &text=Tenho interesse na sua aula de {{subjects[proffy.subject - 1]}}, {{proffy.proffyData.name}}" class="button" target="_blank">
                             <img src="./images/icons/whatsapp.svg" alt="whatsapp">Entrar em contato
                         </a>
                     </footer>
                 </article>
-                {% set count = 1 %}
-                {%endif%}
             {%endfor%}
 
-            {% if count < 1 %}
+            {% if proffyList.length < 1 %}
             <div class="no-proffy">
                 <img src="./images/success-background.svg" alt="">
-                <h2>Ops! A pesquisa não encontrou nenhum Proffy.</h2>
+                <strong>Ops! A pesquisa não encontrou nenhum Proffy.</strong>
             </div>
             {%endif%}
         </main>

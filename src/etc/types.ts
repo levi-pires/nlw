@@ -28,7 +28,7 @@ export type ClassQuery = {
 export type ScheduleQuery = {
   id: number;
   class_id: number;
-  weekday: number;
+  weekday: string;
   time_from: number;
   time_to: number;
 };

@@ -33,7 +33,7 @@
       </header>
 
       <main>
-        <form action="" id="create-class">
+        <form method="POST" id="create-class">
           <fieldset>
             <legend>Seus dados</legend>
             <div class="input-block">
@@ -95,10 +95,9 @@
                 <label for="weekday">Dia da Semana</label>
                 <select name="weekday[]" required>
                   <option value="">Selecione uma opção</option>
-                  <!--disabled="" hidden=""<m-->
 
                   {%for day in weekdays %}
-                  <option value="{{loop.index0}}">{{day}}</option>
+                  <option value="{{loop.index}}">{{day}}</option>
                   {%endfor%}
                 </select>
               </div>

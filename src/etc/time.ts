@@ -1,10 +1,5 @@
-function parseTime(array: string[]) {
-  return array.map((value) =>
-    (
-      parseInt(value.split(":")[0]) * 60 +
-      parseInt(value.split(":")[1])
-    ).toString()
-  );
+function parseTime(time: string) {
+  return parseInt(time.split(":")[0]) * 60 + parseInt(time.split(":")[1]);
 }
 
 function toTime(min: number) {

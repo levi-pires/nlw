@@ -126,21 +126,23 @@
 
 .no-proffy {
   background: var(--color-primary-transparent);
-  border-radius: 1rem;
+  border-radius: 5%;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 5rem 1rem;
-  padding: 0.75rem;
+  padding: 0.8rem;
 }
 
 .no-proffy img {
   width: 100%;
 }
 
-.no-proffy h2 {
+.no-proffy strong {
+  padding: 1rem;
   position: absolute;
-  font: 700 1.5rem Archivo;
+  font-size: 2rem;
+  text-align: center;
 }
 
 @media (min-width: 700px) {
@@ -182,10 +184,11 @@
     margin-right: 16px;
   }
   .no-proffy {
-    border-radius: 2rem;
     margin: 10rem 0;
+    padding: 2rem;
   }
-  .no-proffy h2 {
-    font-size: 2.4rem;
+  .no-proffy strong {
+    padding: 0;
+    font-size: 2.5rem;
   }
 }

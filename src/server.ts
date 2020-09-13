@@ -5,6 +5,8 @@ import proffy from "./database/proffy";
 import time from "./etc/time";
 import * as types from "./etc/types";
 import localtunnel from "localtunnel";
+import readline from "readline";
+import bodyParser from "body-parser";
 
 const server = express();
 const subjects = [
@@ -34,62 +36,99 @@ nunjucks.configure("public", {
   noCache: true,
 });
 
-const serv = server
+const address = server
   .use(express.static("public"))
 
   .get("/study", (req, res) => {
-    db.then(
-      (dataBase) => {
-        proffy.getAll(dataBase).then(
-          (proffys) => {
-            res.render("study.html", {
-              proffys: proffys.proffys,
-              classes: proffys.classes,
-              filters: req.query,
-              is_not_searching:
-                !req.query.time || !req.query.weekday || !req.query.subject,
-              subjects,
-              weekdays,
-              time_fun: time.parseTime,
+    const proffyList: {
+      proffyData: types.ProffyQuery;
+      subject: string;
+      cost: string;
+    }[] = [];
+
+    db.then(async (dataBase) => {
+      const proffys = await proffy.getAll(dataBase);
+      const keys = {
+        time: time.parseTime(req.query.time as string),
+        weekday: req.query.weekday as string,
+        subject: req.query.subject as string,
+      };
+
+      if (req.query.weekday && req.query.subject && req.query.time) {
+        proffys.forEach((item) => {
+          if (proffy.has(item, keys)) {
+            proffyList.push({
+              proffyData: item.proffy,
+              subject: item.class.this.subject,
+              cost: item.class.this.cost,
             });
-          },
+          }
+        });
+      } else {
+        proffys.forEach((item) => {
+          proffyList.push({
+            proffyData: item.proffy,
+            subject: item.class.this.subject,
+            cost: item.class.this.cost,
+          });
+        });
+      }
 
-          (error) => console.error(error)
-        );
-      },
-
-      (error) => console.error(error)
-    );
+      res.render("study.html", {
+        proffyList,
+        weekdays,
+        subjects,
+        filters: req.query,
+      });
+    });
   })
 
-  .get("/give-classes", (req, res) => {
-    if (req.query.name) {
-      const { ...query } = req.query as types.Proffy;
+  .get("/give-classes", (_, res) =>
+    res.render("give-classes.html", { weekdays, subjects })
+  )
+
+  .post(
+    "/give-classes",
+    bodyParser.urlencoded({ extended: true }),
+    (req, res) => {
+      const { ...body } = req.body as types.Proffy;
 
       db.then((db) => {
         proffy
           .create(db, {
-            ...query,
-            time_from: time.parseTime(query.time_from),
-            time_to: time.parseTime(query.time_to),
+            ...body,
+            time_from: body.time_from.map((value) =>
+              time.parseTime(value).toString()
+            ),
+            time_to: body.time_to.map((value) =>
+              time.parseTime(value).toString()
+            ),
           })
           .then(console.log);
+
+        res.redirect("/study");
       });
-
-      return res.redirect("/study");
     }
-
-    res.render("give-classes.html", { weekdays, subjects });
-  })
+  )
 
   .listen(5631)
   .address() as import("net").AddressInfo;
 
-localtunnel(serv.port, { subdomain: "levip" }).then((tunnel) =>
+localtunnel(address.port, { subdomain: "levip" }).then((tunnel) => {
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+  process.stdin.on("keypress", (_, key) => {
+    if (key.ctrl && key.name == "c") {
+      console.log("\nClosing tunnel...");
+      tunnel.close();
+      process.exit(0);
+    }
+  });
+
   console.log(`
   Server running...
 
-  //IP Address: ${serv.address}
-  //Port: ${serv.port}
-  //URL: ${tunnel.url}`)
-);
+  //IP Address: ${address.address}
+  //Port: ${address.port}
+  //URL: ${tunnel.url}`);
+});
